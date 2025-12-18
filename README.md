@@ -1,68 +1,149 @@
-1. Récupération du projet
+TP Docker – Deux microservices (Java + PHP)
+Ce projet contient deux microservices :
+Microservice Java (Spring Boot) : retourne le message bonjour.
+Microservice PHP : retourne mon prénom.
+Les deux services sont dockerisés et publiés sur Docker Hub.
 
-Clonage du dépôt d’origine :
-git clone https://github.com/charroux/ingnum.git
-cd ingnum
-Création d’un dépôt Git personnel sur GitHub, puis changement du dépôt distant :
-git remote remove origin
-git remote add origin https://github.com/Nash920/Bastien_Coutte_Docker.git
-git push -u origin main
+1. Pré-requis
 
-2. Prérequis
-
+Avant de commencer, installer :
 Java JDK 21
 Git
-Docker Desktop
-Système d’exploitation : Windows
-Vérification des installations :
+Docker Desktop (Windows)
+Gradle Wrapper (inclus dans le projet)
+Vérification :
 java -version
 git --version
 docker --version
 
-3. Compilation et exécution sans Docker
+2. Récupération du projet d’origine
 
-Le projet utilise Gradle Wrapper.
-Se placer dans le dossier du service :
+Clonage du dépôt fourni :
+git clone https://github.com/charroux/ingnum.git
+cd ingnum
+
+3. Création de mon dépôt GitHub et configuration
+
+Le dépôt local est associé à mon propre dépôt GitHub :
+git remote remove origin
+git remote add origin https://github.com/Nash920/Bastien_Coutte_Docker.git
+git push -u origin main
+
+4. Microservice Java (Spring Boot)
+4.1. Compilation sans Docker
+
+Aller dans le dossier :
 cd RentalService
-Compilation du projet
-Sous Windows :
-.\gradlew.bat build
-Cette commande génère le fichier JAR dans le dossier build/libs.
-Exécution de l’application
-java -jar build\libs\RentalService-0.0.1-SNAPSHOT.jar
-Vérification
-Dans un navigateur web, accéder à l’adresse suivante :
-http://localhost:8080/bonjour
-Le message bonjour confirme que l’application fonctionne correctement.
+Compiler :
 
-4. Dockerisation de l’application
-   
-Création du Dockerfile
-Un fichier nommé Dockerfile (sans extension) est créé dans le dossier RentalService avec le contenu suivant :
+.\gradlew.bat build
+Un fichier JAR est généré dans :
+build/libs/RentalService-0.0.1-SNAPSHOT.jar
+
+4.2. Exécution sans Docker
+
+java -jar build\libs\RentalService-0.0.1-SNAPSHOT.jar
+Test dans le navigateur :
+http://localhost:8080/bonjour
+
+4.3. Dockerisation du microservice Java
+
+Créer un fichier Dockerfile dans RentalService :
 FROM eclipse-temurin:21
 VOLUME /tmp
 EXPOSE 8080
 ADD ./build/libs/RentalService-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
-Construction de l’image Docker
-Toujours dans le dossier RentalService :
+
+4.4. Construction de l’image Docker
 docker build -t rentalservice:1.0 .
-Cette commande crée une image Docker nommée rentalservice avec le tag 1.0.
-Exécution du conteneur Docker
+
+4.5. Exécution du conteneur Docker
 docker run -p 8080:8080 rentalservice:1.0
-Vérification
-Dans le navigateur :
+
+
+Test :
 http://localhost:8080/bonjour
-Le message bonjour confirme que l’application fonctionne correctement dans un conteneur Docker.
 
-6. Publication de l’image sur Docker Hub
+4.6. Publication de l’image Docker (Docker Hub)
 
-Connexion à Docker Hub :
+Connexion :
 docker login
-Tag de l’image avec le nom du compte Docker Hub :
-docker tag rentalservice:1.0 <VOTRE_USER_DOCKERHUB>/rentalservice:1.0
+Tag :
+docker tag rentalservice:1.0 nash920/rentalservice:1.0
+Push :
+docker push nash920/rentalservice:1.0
+Lien Docker Hub :
+https://hub.docker.com/r/nash920/rentalservice
+
+5. Microservice PHP
+
+Un second microservice simple est ajouté dans le projet.
+
+5.1. Création du dossier
+
+À la racine du projet :
+mkdir PhpService
+cd PhpService
+
+5.2. Création du fichier PHP
+
+Créer index.php :
+<?php
+echo "Bastien";
+Ce service retourne mon prénom via GET.
+
+5.3. Dockerfile pour PHP
+
+Créer Dockerfile :
+FROM php:8.2-apache
+COPY . /var/www/html/
+EXPOSE 80
+
+5.4. Construction de l’image Docker PHP
+docker build -t phpservice:1.0 .
+
+5.5. Exécution du microservice PHP en Docker
+docker run -p 8081:80 phpservice:1.0
+
+Test dans le navigateur :
+http://localhost:8081
+Contenu attendu :
+Bastien
+
+5.6. Publication de l’image sur Docker Hub
+
+Tag :
+docker tag phpservice:1.0 nash920/phpservice:1.0
+
+Push :
+docker push nash920/phpservice:1.0
+Lien Docker Hub :
+https://hub.docker.com/r/nash920/phpservice
+
+6. Mise à jour du dépôt GitHub
+
+Retour à la racine du projet :
+cd ..
+git add .
+git commit -m "Ajout du microservice PHP et des Dockerfiles"
+git push
+
+7. Résumé du TP
+
+Ce TP m’a permis de :
+gérer un projet avec Git et GitHub
+compiler un microservice Java (Spring Boot) avec Gradle
+exécuter une application Java sans Docker
+dockeriser une application Java via un Dockerfile
+créer un second microservice en PHP
+dockeriser le service PHP
+construire et exécuter deux images Docker
+publier deux images Docker sur Docker Hub
+créer un README complet
+maintenir un dépôt Git propre et fonctionnel
+Images Docker publiées :
+Java : https://hub.docker.com/r/nash920/rentalservice
+PHP : https://hub.docker.com/r/nash920/phpservice
 
 
-Publication de l’image :
-
-docker push <VOTRE_USER_DOCKERHUB>/rentalservice:1.0
