@@ -147,3 +147,57 @@ Java : https://hub.docker.com/r/nash920/rentalservice
 PHP : https://hub.docker.com/r/nash920/phpservice
 
 
+Docker Compose
+
+Un fichier docker-compose.yml a été ajouté à la racine du projet afin de builder et lancer les deux microservices (Java et PHP).
+Contenu du fichier docker-compose.yml
+services:
+  java-service:
+    build:
+      context: ./RentalService
+      dockerfile: Dockerfile
+    container_name: java-service
+    ports:
+      - "8080:8080"
+
+  php-service:
+    build:
+      context: ./PhpService
+      dockerfile: Dockerfile
+    container_name: php-service
+    ports:
+      - "8081:80"
+
+Lancement des deux services
+docker compose up --build
+Les deux conteneurs sont alors accessibles :
+
+Microservice Java :
+http://localhost:8080/bonjour
+
+Microservice PHP :
+http://localhost:8081/
+
+Communication entre microservices
+Le microservice Java a été modifié pour communiquer avec le microservice PHP.
+Un nouvel endpoint a été ajouté :
+
+GET http://localhost:8080/bonjour-php
+
+Ce point d’entrée appelle automatiquement le microservice PHP via l’URL interne Docker :
+http://php-service
+Code ajouté dans BonjourController.java :
+
+@GetMapping("/bonjour-php")
+public String bonjourDepuisPhp() {
+    String prenom = restTemplate.getForObject("http://php-service", String.class);
+    return "bonjour " + prenom;
+}
+
+
+Résultat dans le navigateur :
+
+bonjour Bastien
+
+→ Cela prouve que les deux microservices communiquent correctement via Docker.
+
